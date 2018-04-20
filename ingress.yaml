@@ -1,0 +1,50 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: echo-ingress
+  annotations:
+    ingress.kubernetes.io/rewrite-target: /
+spec:
+  rules:
+  - http:
+      paths:
+      - path: /echo
+        backend:
+          serviceName: http-echo-ingress-service
+          servicePort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: http-echo-ingress-service
+spec:
+  selector:
+    app: http-echo-ingress
+  ports:
+  - name: http
+    protocol: TCP
+    port: 80
+    targetPort: 80
+  type: NodePort
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: http-echo-ingress-deployment
+  labels:
+    app: http-echo-ingress
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: http-echo-ingress
+  template:
+    metadata:
+      labels:
+        app: http-echo-ingress
+    spec:
+      containers:
+      - name: http-echo-ingress
+        image: nginx:alpine
+        ports:
+        - containerPort: 80
